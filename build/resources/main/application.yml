@@ -1,0 +1,20 @@
+server:
+  port: 5174
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ai_calendar_dev
+    username: app
+    password: app1234
+
+  jpa:
+    hibernate:
+      ddl-auto: validate   # create/update 금지 (Flyway가 담당)
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
