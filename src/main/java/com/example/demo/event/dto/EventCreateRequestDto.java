@@ -1,7 +1,6 @@
 package com.example.demo.event.dto;
 
 import com.example.demo.eventslot.dto.EventSlotRequestDto;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
@@ -9,7 +8,7 @@ import java.util.List;
 
 public class EventCreateRequestDto {
 
-    @NotBlank
+    @NotNull(message = "status는 필수입니다")
     private String status;
 
     @NotNull

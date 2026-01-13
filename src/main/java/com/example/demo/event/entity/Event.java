@@ -27,7 +27,8 @@ public class Event {
     private User createdBy;
 
     @Column(name = "status", nullable = false, length = 20)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private EventStatus status;
 
     @Column(name = "start_at", nullable = false)
     private LocalDateTime startAt;
@@ -53,7 +54,7 @@ public class Event {
     public Event(UUID id,
                  Calendar calendar,
                  User createdBy,
-                 String status,
+                 EventStatus status,
                  LocalDateTime startAt,
                  LocalDateTime endAt,
                  String color) {
@@ -90,7 +91,7 @@ public class Event {
         return createdBy;
     }
 
-    public String getStatus() {
+    public EventStatus getStatus() {
         return status;
     }
 
@@ -118,7 +119,7 @@ public class Event {
         return slots;
     }
 
-    public void update(String status,
+    public void update(EventStatus status,
                        LocalDateTime startAt,
                        LocalDateTime endAt,
                        String color) {
