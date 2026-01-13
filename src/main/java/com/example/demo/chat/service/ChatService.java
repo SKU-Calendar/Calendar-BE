@@ -108,7 +108,7 @@ public class ChatService {
             ChatMessage aiMessage = new ChatMessage(
                     UUID.randomUUID(),
                     chatId,
-                    ChatMessage.MessageRole.AI,
+                    ChatMessage.MessageRole.ASSISTANT,
                     aiResponseJson
             );
             chatMessageRepository.save(aiMessage);
@@ -143,7 +143,7 @@ public class ChatService {
             return new ChatResponseDto(
                     aiMessage.getId(),
                     aiMessage.getSessionId(),
-                    aiMessage.getRole().name(),
+                    mapRoleToString(aiMessage.getRole()),
                     aiMessage.getContent(),
                     aiMessage.getCreatedAt()
             );
@@ -161,7 +161,7 @@ public class ChatService {
             ChatMessage errorMessageEntity = new ChatMessage(
                     UUID.randomUUID(),
                     chatId,
-                    ChatMessage.MessageRole.AI,
+                    ChatMessage.MessageRole.ASSISTANT,
                     errorMessage
             );
             chatMessageRepository.save(errorMessageEntity);
@@ -188,7 +188,7 @@ public class ChatService {
             responses.add(new ChatResponseDto(
                     message.getId(),
                     message.getSessionId(),
-                    message.getRole().name(),
+                    mapRoleToString(message.getRole()),
                     message.getContent(),
                     message.getCreatedAt()
             ));
@@ -204,6 +204,50 @@ public class ChatService {
         String email = authentication.getName();
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+    }
+
+    /**
+     * MessageRole enum을 String으로 변환합니다.
+     * DB 제약조건에 맞게 USER, ASSISTANT, SYSTEM만 반환합니다.
+     */
+    private String mapRoleToString(ChatMessage.MessageRole role) {
+        if (role == null) {
+            throw new IllegalArgumentException("Role cannot be null");
+        }
+        return role.name();
+    }
+
+    /**
+     * 외부에서 입력받은 role 문자열을 MessageRole enum으로 변환합니다.
+     * "AI"는 "ASSISTANT"로 매핑됩니다.
+     * 허용되지 않는 값은 IllegalArgumentException을 발생시킵니다.
+     */
+    public static ChatMessage.MessageRole parseRole(String roleStr) {
+        if (roleStr == null || roleStr.trim().isEmpty()) {
+            throw new IllegalArgumentException("Role cannot be null or empty");
+        }
+        
+        String normalized = roleStr.trim().toUpperCase();
+        
+        // "AI"를 "ASSISTANT"로 매핑
+        if ("AI".equals(normalized)) {
+            normalized = "ASSISTANT";
+        }
+        
+        try {
+            ChatMessage.MessageRole role = ChatMessage.MessageRole.valueOf(normalized);
+            // USER, ASSISTANT, SYSTEM만 허용
+            if (role != ChatMessage.MessageRole.USER 
+                    && role != ChatMessage.MessageRole.ASSISTANT 
+                    && role != ChatMessage.MessageRole.SYSTEM) {
+                throw new IllegalArgumentException(
+                        "Invalid role: " + roleStr + ". Allowed values: USER, ASSISTANT, SYSTEM (or AI which maps to ASSISTANT)");
+            }
+            return role;
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(
+                    "Invalid role: " + roleStr + ". Allowed values: USER, ASSISTANT, SYSTEM (or AI which maps to ASSISTANT)", e);
+        }
     }
 
     private String convertToJson(AiEventResponseDto dto) {

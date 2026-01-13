@@ -62,7 +62,7 @@ public class ChatMessage {
     }
 
     public enum MessageRole {
-        USER, AI
+        USER, ASSISTANT, SYSTEM
     }
 }
 
