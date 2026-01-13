@@ -1,4 +1,9 @@
+-- V1__init.sql
+-- PostgreSQL
+
+--------------------------------------------------
 -- UUID 생성용
+--------------------------------------------------
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 --------------------------------------------------
@@ -58,7 +63,7 @@ CREATE TABLE events (
 );
 
 --------------------------------------------------
--- event_slots (slot_date 제거됨)
+-- event_slots
 --------------------------------------------------
 CREATE TABLE event_slots (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -71,7 +76,7 @@ CREATE TABLE event_slots (
     slot_start_at TIMESTAMP NOT NULL,
     slot_end_at TIMESTAMP NOT NULL,
 
-    is_done BOOLEAN DEFAULT false,
+    is_done BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMP NOT NULL DEFAULT now(),
     updated_at TIMESTAMP NOT NULL DEFAULT now(),
 
@@ -99,3 +104,50 @@ ON event_slots (calendar_id, (DATE(slot_start_at)), slot_index);
 CREATE INDEX idx_events_calendar_id ON events(calendar_id);
 CREATE INDEX idx_slots_event_id ON event_slots(event_id);
 CREATE INDEX idx_slots_calendar_start ON event_slots(calendar_id, slot_start_at);
+
+--------------------------------------------------
+-- chat_sessions 
+--------------------------------------------------
+CREATE TABLE chat_sessions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL,
+    calendar_id UUID NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT now(),
+    updated_at TIMESTAMP NOT NULL DEFAULT now(),
+
+    CONSTRAINT fk_chat_sessions_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_chat_sessions_calendar
+        FOREIGN KEY (calendar_id)
+        REFERENCES calendars(id)
+        ON DELETE CASCADE
+);
+
+-- “채팅방 하나만” 규칙: 유저+캘린더 조합은 1개만
+CREATE UNIQUE INDEX uq_chat_session_user_calendar
+ON chat_sessions(user_id, calendar_id);
+
+--------------------------------------------------
+-- chat_messages
+--------------------------------------------------
+CREATE TABLE chat_messages (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    session_id UUID NOT NULL,
+    role VARCHAR(20) NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT now(),
+
+    CONSTRAINT fk_chat_messages_session
+        FOREIGN KEY (session_id)
+        REFERENCES chat_sessions(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT chk_chat_messages_role
+        CHECK (role IN ('USER', 'ASSISTANT', 'SYSTEM'))
+);
+
+CREATE INDEX idx_chat_messages_session_created
+ON chat_messages(session_id, created_at);
