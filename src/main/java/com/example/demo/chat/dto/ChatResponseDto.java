@@ -14,7 +14,7 @@ public class ChatResponseDto {
     @Schema(description = "채팅 ID")
     private final UUID chatId;
 
-    @Schema(description = "메시지 역할", example = "USER")
+    @Schema(description = "메시지 역할", example = "USER", allowableValues = {"USER", "ASSISTANT", "SYSTEM"})
     private final String role;
 
     @Schema(description = "메시지 내용")
