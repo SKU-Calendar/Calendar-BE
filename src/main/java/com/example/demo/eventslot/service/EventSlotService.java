@@ -3,6 +3,7 @@ package com.example.demo.eventslot.service;
 import com.example.demo.calendar.entity.Calendar;
 import com.example.demo.calendar.repository.CalendarRepository;
 import com.example.demo.event.entity.Event;
+import com.example.demo.event.entity.EventStatus;
 import com.example.demo.event.repository.EventRepository;
 import com.example.demo.eventslot.dto.EventSlotCreateWithoutEventRequestDto;
 import com.example.demo.eventslot.dto.EventSlotDoneRequestDto;
@@ -153,7 +154,7 @@ public class EventSlotService {
                 UUID.randomUUID(),
                 calendar,
                 currentUser,
-                "ACTIVE",
+                EventStatus.PLANNED, // ACTIVE는 PLANNED로 매핑
                 request.getSlotStartAt(),
                 request.getSlotEndAt(),
                 null // color는 기본값 null

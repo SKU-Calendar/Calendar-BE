@@ -7,6 +7,7 @@ import com.example.demo.event.dto.EventDeleteRequestDto;
 import com.example.demo.event.dto.EventResponseDto;
 import com.example.demo.event.dto.EventUpdateRequestDto;
 import com.example.demo.event.entity.Event;
+import com.example.demo.event.entity.EventStatus;
 import com.example.demo.event.repository.EventRepository;
 import com.example.demo.eventslot.dto.EventSlotResponseDto;
 import com.example.demo.eventslot.service.EventSlotService;
@@ -51,11 +52,13 @@ public class EventService {
 
         ensureCalendarOwner(calendar, currentUser);
 
+        EventStatus status = parseAndMapStatus(request.getStatus());
+
         Event event = new Event(
                 UUID.randomUUID(),
                 calendar,
                 currentUser,
-                request.getStatus(),
+                status,
                 request.getStartAt(),
                 request.getEndAt(),
                 request.getColor()
@@ -100,8 +103,12 @@ public class EventService {
 
         ensureEventAccess(calendar, event, currentUser);
 
+        EventStatus status = request.getStatus() != null 
+                ? parseAndMapStatus(request.getStatus()) 
+                : null;
+
         event.update(
-                request.getStatus(),
+                status,
                 request.getStartAt(),
                 request.getEndAt(),
                 request.getColor()
@@ -136,7 +143,7 @@ public class EventService {
     private EventResponseDto toResponse(Event event, List<EventSlotResponseDto> slots) {
         return new EventResponseDto(
                 event.getId(),
-                event.getStatus(),
+                event.getStatus().name(),
                 event.getStartAt(),
                 event.getEndAt(),
                 event.getColor(),
@@ -144,6 +151,33 @@ public class EventService {
                 event.getUpdatedAt(),
                 slots
         );
+    }
+
+    /**
+     * 외부에서 입력받은 status 문자열을 EventStatus enum으로 변환합니다.
+     * "ACTIVE"는 "PLANNED"로 매핑됩니다.
+     * 허용되지 않는 값은 ResponseStatusException(400 Bad Request)을 발생시킵니다.
+     */
+    private EventStatus parseAndMapStatus(String statusStr) {
+        if (statusStr == null || statusStr.trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                    "Status cannot be null or empty. Allowed values: PLANNED, CONFIRMED, DONE, CANCELLED (or ACTIVE which maps to PLANNED)");
+        }
+
+        String normalized = statusStr.trim().toUpperCase();
+
+        // "ACTIVE"를 "PLANNED"로 매핑
+        if ("ACTIVE".equals(normalized)) {
+            normalized = "PLANNED";
+        }
+
+        try {
+            EventStatus status = EventStatus.valueOf(normalized);
+            return status;
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Invalid status: " + statusStr + ". Allowed values: PLANNED, CONFIRMED, DONE, CANCELLED (or ACTIVE which maps to PLANNED)");
+        }
     }
 
     private User getCurrentUser() {

@@ -10,6 +10,7 @@ import com.example.demo.chat.entity.ChatSession;
 import com.example.demo.chat.repository.ChatMessageRepository;
 import com.example.demo.chat.repository.ChatSessionRepository;
 import com.example.demo.event.entity.Event;
+import com.example.demo.event.entity.EventStatus;
 import com.example.demo.event.repository.EventRepository;
 import com.example.demo.eventslot.entity.EventSlot;
 import com.example.demo.eventslot.repository.EventSlotRepository;
@@ -117,7 +118,7 @@ public class ChatService {
                     UUID.randomUUID(),
                     calendar,
                     currentUser,
-                    "ACTIVE",
+                    EventStatus.PLANNED, // ACTIVE는 PLANNED로 매핑
                     aiResponse.getStartAt(),
                     aiResponse.getEndAt(),
                     null // color는 기본값 null
