@@ -1,8 +1,8 @@
 # 👨‍💻 Developers
 
-| <img src="https://avatars.githubusercontent.com/u/163867289?v=4" width=100> | <img src="https://avatars.githubusercontent.com/u/197270758?v=4" width=100> | <img src="https://github.com/identicons/guest.png" width=100> |
+| <img src="https://avatars.githubusercontent.com/u/197270758?v=4" width=100> | <img src="https://avatars.githubusercontent.com/u/67868522?v=4" width=100> | <img src="https://avatars.githubusercontent.com/u/163867289?v=4" width=100> |
 | :------------------------------------------------------------------------: | :------------------------------------------------------------------------: | :----------------------------------------------------------: |
-| [김민호](https://github.com/minho0805)  | [이정완](https://avatars.githubusercontent.com/u/67868522?v=4)  | [박경원](https://avatars.githubusercontent.com/u/163867289?v=4) |
+| [김민호](https://github.com/minho0805)  | [이정완](https://github.com/dlwjddhks)  | [박경원](hhttps://github.com/gyeongwonKR) |
 |     **Frontend** |         **Backend** |            **Backend** |
 
 <br>
