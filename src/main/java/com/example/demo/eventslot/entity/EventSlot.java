@@ -18,6 +18,9 @@ public class EventSlot {
     @JoinColumn(name = "event_id", nullable = false, columnDefinition = "BINARY(16)")
     private Event event;
 
+    @Column(name = "calendar_id", nullable = false, columnDefinition = "BINARY(16)")
+    private UUID calendarId;
+
     @Column(name = "slot_start_at", nullable = false)
     private LocalDateTime slotStartAt;
 
@@ -63,6 +66,11 @@ public class EventSlot {
         LocalDateTime now = LocalDateTime.now();
         this.createdAt = now;
         this.updatedAt = now;
+        
+        // calendar_id가 설정되지 않았다면 event의 calendarId로 자동 설정
+        if (this.calendarId == null && this.event != null && this.event.getCalendar() != null) {
+            this.calendarId = this.event.getCalendar().getId();
+        }
     }
 
     @PreUpdate
@@ -76,6 +84,10 @@ public class EventSlot {
 
     public Event getEvent() {
         return event;
+    }
+
+    public UUID getCalendarId() {
+        return calendarId;
     }
 
     public LocalDateTime getSlotStartAt() {
