@@ -106,7 +106,7 @@ public class CalendarService {
             List<EventSlotResponseDto> slots = eventSlotService.findByEvent(event);
             eventResponses.add(new EventResponseDto(
                     event.getId(),
-                    event.getStatus(),
+                    event.getStatus().name(),
                     event.getStartAt(),
                     event.getEndAt(),
                     event.getColor(),

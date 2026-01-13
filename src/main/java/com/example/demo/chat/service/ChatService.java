@@ -221,11 +221,12 @@ public class ChatService {
     /**
      * 외부에서 입력받은 role 문자열을 MessageRole enum으로 변환합니다.
      * "AI"는 "ASSISTANT"로 매핑됩니다.
-     * 허용되지 않는 값은 IllegalArgumentException을 발생시킵니다.
+     * 허용되지 않는 값은 ResponseStatusException(400 Bad Request)을 발생시킵니다.
      */
     public static ChatMessage.MessageRole parseRole(String roleStr) {
         if (roleStr == null || roleStr.trim().isEmpty()) {
-            throw new IllegalArgumentException("Role cannot be null or empty");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Role cannot be null or empty. Allowed values: USER, ASSISTANT, SYSTEM (or AI which maps to ASSISTANT)");
         }
         
         String normalized = roleStr.trim().toUpperCase();
@@ -241,13 +242,13 @@ public class ChatService {
             if (role != ChatMessage.MessageRole.USER 
                     && role != ChatMessage.MessageRole.ASSISTANT 
                     && role != ChatMessage.MessageRole.SYSTEM) {
-                throw new IllegalArgumentException(
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Invalid role: " + roleStr + ". Allowed values: USER, ASSISTANT, SYSTEM (or AI which maps to ASSISTANT)");
             }
             return role;
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException(
-                    "Invalid role: " + roleStr + ". Allowed values: USER, ASSISTANT, SYSTEM (or AI which maps to ASSISTANT)", e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Invalid role: " + roleStr + ". Allowed values: USER, ASSISTANT, SYSTEM (or AI which maps to ASSISTANT)");
         }
     }
 
