@@ -25,6 +25,8 @@ repositories {
 }
 
 dependencies {
+     // ✅ github action 
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
     // ✅ MVC 기본(Controller/DispatcherServlet)
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
