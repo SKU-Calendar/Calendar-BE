@@ -75,8 +75,14 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
 
+        // 사용자 ID 검증: 로그인 성공했는데 사용자 ID가 없는 경우는 비정상 상황
+        if (user.getId() == null) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
+                    "User ID is missing after successful authentication. Email: " + request.getEmail());
+        }
+
         String token = generateAccessToken(user);
-        return new AuthResponseDto(token, "Bearer", "LOGIN_SUCCESS");
+        return new AuthResponseDto(token, "Bearer", "LOGIN_SUCCESS", user.getId());
     }
 
     public AuthResponseDto logout() {
