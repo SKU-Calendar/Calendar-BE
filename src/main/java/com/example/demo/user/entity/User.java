@@ -1,9 +1,6 @@
 package com.example.demo.user.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -24,7 +21,7 @@ import java.util.UUID;
 public class User {
 
     @Id
-    @Column(name = "id", nullable = false, columnDefinition = "BINARY(16)")
+    @Column(name = "id", nullable = false)
     private UUID id;
 
     @Column(name = "email", nullable = false, length = 255)
@@ -46,12 +43,14 @@ public class User {
         // JPA 기본 생성자
     }
 
-    public User(UUID id,
-                String email,
-                String password,
-                String name,
-                LocalDateTime createdAt,
-                LocalDateTime updatedAt) {
+    public User(
+            UUID id,
+            String email,
+            String password,
+            String name,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt
+    ) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -59,6 +58,37 @@ public class User {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
+
+    /* =========================
+       비즈니스 메서드
+       ========================= */
+
+    /**
+     * 프로필 이름 변경
+     * dirty checking에 의해 UPDATE 쿼리 발생
+     */
+    public void changeName(String name) {
+        this.name = name;
+    }
+
+    /* =========================
+       JPA 생명주기 콜백
+       ========================= */
+
+    @PrePersist
+    void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = this.createdAt;
+    }
+
+    @PreUpdate
+    void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /* =========================
+       Getter
+       ========================= */
 
     public UUID getId() {
         return id;
