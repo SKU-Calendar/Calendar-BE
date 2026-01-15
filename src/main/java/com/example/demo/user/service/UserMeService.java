@@ -1,6 +1,6 @@
 package com.example.demo.user.service;
 
-import com.example.demo.user.domain.User;
+import com.example.demo.user.entity.User;
 import com.example.demo.user.dto.ProfileResponse;
 import com.example.demo.user.dto.ProfileUpdateRequest;
 import com.example.demo.user.repository.UserRepository;
@@ -31,7 +31,7 @@ public class UserMeService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        user.setName(req.name()); // 변경 감지(dirty checking)로 UPDATE 발생
+        user.changeName(req.name());   // 🔥 여기서 dirty checking
         return toResponse(user);
     }
 
