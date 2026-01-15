@@ -1,5 +1,6 @@
 package com.example.demo.config.jwt;
 
+import com.example.demo.common.security.CustomPrincipal;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.JwtException;
@@ -20,8 +21,11 @@ import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
@@ -36,11 +40,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.issuer = issuer;
     }
 
-    // ⭐⭐⭐ 핵심 추가 부분 ⭐⭐⭐
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-
         return path.startsWith("/api/auth/")
                 || path.startsWith("/swagger-ui")
                 || path.startsWith("/v3/api-docs");
@@ -55,6 +57,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader("Authorization");
 
+        // Authorization 헤더가 없거나 Bearer 토큰이 아니면 그냥 통과
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -70,13 +73,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     .parseSignedClaims(token)
                     .getPayload();
 
+            // 보통 subject에는 userId(UUID)를 넣는 게 가장 깔끔함
             String subject = claims.getSubject();
             String email = claims.get("email", String.class);
 
+            // 이미 인증되어 있으면 중복 세팅하지 않음
             if (subject != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UUID userId;
+
+                try {
+                    userId = UUID.fromString(subject);
+                } catch (IllegalArgumentException e) {
+                    // subject가 UUID가 아니면 토큰 설계가 현재 코드와 안 맞는 것
+                    log.warn("JWT subject is not UUID: {}", subject);
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
+                // ✅ 핵심: principal을 CustomPrincipal로 넣는다
+                CustomPrincipal principal = new CustomPrincipal(userId, email);
+
                 Authentication authentication =
                         new UsernamePasswordAuthenticationToken(
-                                email != null ? email : subject,
+                                principal,
                                 null,
                                 Collections.emptyList()
                         );
@@ -94,5 +113,3 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 }
-
-
