@@ -1,6 +1,5 @@
 package com.example.demo.config.jwt;
 
-import com.example.demo.common.security.CustomPrincipal;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.JwtException;
@@ -12,7 +11,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -21,12 +19,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.UUID;
-
+import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
@@ -41,9 +36,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.issuer = issuer;
     }
 
+    // ⭐⭐⭐ 핵심 추가 부분 ⭐⭐⭐
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
+
         return path.startsWith("/api/auth/")
                 || path.startsWith("/swagger-ui")
                 || path.startsWith("/v3/api-docs");
@@ -77,24 +74,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String email = claims.get("email", String.class);
 
             if (subject != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UUID userId;
-
-                try {
-                    userId = UUID.fromString(subject);
-                } catch (IllegalArgumentException e) {
-                    log.warn("JWT subject is not UUID: {}", subject);
-                    filterChain.doFilter(request, response);
-                    return;
-                }
-
-                CustomPrincipal principal = new CustomPrincipal(userId, email);
-
-                // ✅ 권한 최소 1개 부여
                 Authentication authentication =
                         new UsernamePasswordAuthenticationToken(
-                                principal,
+                                email != null ? email : subject,
                                 null,
-                                List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                                Collections.emptyList()
                         );
 
                 ((UsernamePasswordAuthenticationToken) authentication)
