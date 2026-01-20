@@ -18,8 +18,10 @@ public class CorsConfig {
         // 프론트 도메인으로 교체 (예: http://localhost:3000, https://your-frontend.com)
         config.setAllowedOrigins(List.of(
                 "http://localhost:8081",
-                "http://localhost:19000",
-                "http://localhost:19001"
+                "http://localhost:19006",
+                "http://127.0.0.1:8081",
+                "http://127.0.0.1:19006",
+                "http://192.168.0.0/16"
                 // "https://프론트도메인"
         ));
 
