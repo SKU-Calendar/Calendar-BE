@@ -3,8 +3,12 @@ package com.example.demo.group.service;
 import com.example.demo.group.dto.*;
 import com.example.demo.group.entity.*;
 import com.example.demo.group.repository.*;
+import com.example.demo.user.entity.User;
+import com.example.demo.user.repository.UserRepository; 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.security.SecureRandom;
 import java.time.Instant;
@@ -18,16 +22,86 @@ public class GroupService {
     private final GroupMemberRepository memberRepository;
     private final GroupInviteRepository inviteRepository;
 
+    // ✅ email -> userId 변환을 위해 추가
+    private final UserRepository userRepository;
+
     private static final String CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     private final SecureRandom random = new SecureRandom();
 
     public GroupService(GroupRepository groupRepository,
                         GroupMemberRepository memberRepository,
-                        GroupInviteRepository inviteRepository) {
+                        GroupInviteRepository inviteRepository,
+                        UserRepository userRepository) {
         this.groupRepository = groupRepository;
         this.memberRepository = memberRepository;
         this.inviteRepository = inviteRepository;
+        this.userRepository = userRepository;
     }
+
+    // =========================================================
+    // ✅ Wrappers: email 기반 API (Controller가 이걸 호출)
+    // =========================================================
+
+    private UUID resolveUserIdByEmail(String email) {
+        // findByEmail 없으면 UserRepository에 추가해야 함
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "유저를 찾을 수 없습니다."));
+        return user.getId();
+    }
+
+    @Transactional
+    public GroupResponse createGroupByEmail(String email, GroupCreateRequest req) {
+        return createGroup(resolveUserIdByEmail(email), req);
+    }
+
+    @Transactional(readOnly = true)
+    public List<GroupResponse> listMyGroupsByEmail(String email) {
+        return listMyGroups(resolveUserIdByEmail(email));
+    }
+
+    @Transactional(readOnly = true)
+    public GroupResponse getGroupByEmail(String email, UUID groupId) {
+        return getGroup(resolveUserIdByEmail(email), groupId);
+    }
+
+    @Transactional
+    public GroupResponse updateGroupByEmail(String email, UUID groupId, GroupUpdateRequest req) {
+        return updateGroup(resolveUserIdByEmail(email), groupId, req);
+    }
+
+    @Transactional
+    public void deleteGroupByEmail(String email, UUID groupId) {
+        deleteGroup(resolveUserIdByEmail(email), groupId);
+    }
+
+    @Transactional
+    public GroupInviteResponse issueInviteByEmail(String email, UUID groupId) {
+        return issueInvite(resolveUserIdByEmail(email), groupId);
+    }
+
+    @Transactional
+    public void acceptInviteByEmail(String email, String inviteCode) {
+        acceptInvite(resolveUserIdByEmail(email), inviteCode);
+    }
+
+    @Transactional(readOnly = true)
+    public List<GroupMemberResponse> listMembersByEmail(String email, UUID groupId) {
+        return listMembers(resolveUserIdByEmail(email), groupId);
+    }
+
+    @Transactional
+    public void kickMemberByEmail(String email, UUID groupId, UUID targetUserId) {
+        kickMember(resolveUserIdByEmail(email), groupId, targetUserId);
+    }
+
+    @Transactional
+    public void leaveGroupByEmail(String email, UUID groupId) {
+        leaveGroup(resolveUserIdByEmail(email), groupId);
+    }
+
+    // =========================================================
+    // 기존 로직 (UUID userId 기반) - 그대로 유지
+    // =========================================================
 
     // -----------------------------
     // Group
@@ -197,7 +271,10 @@ public class GroupService {
     }
 
     private void requireOwner(UUID userId, UUID groupId) {
-        boolean isOwner = memberRepository.findByGroupIdAndUserIdAndRole(groupId, userId, GroupMemberRole.OWNER).isPresent();
+        boolean isOwner = memberRepository
+                .findByGroupIdAndUserIdAndRole(groupId, userId, GroupMemberRole.OWNER)
+                .isPresent();
+
         if (!isOwner) {
             throw new IllegalStateException("그룹 OWNER만 수행할 수 있습니다.");
         }
