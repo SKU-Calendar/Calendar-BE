@@ -89,8 +89,8 @@ public class TimerController {
     }
 
     @Operation(
-            summary = "오늘 공부 시간 통계 조회",
-            description = "오늘 날짜 기준으로 STOPPED 상태의 타이머들의 study_time 합산을 조회합니다."
+            summary = "공부 시간 통계 조회",
+            description = "오늘, 이번 주(월~일), 이번 달, 전체 누적 공부 시간을 한 번에 조회합니다. STOPPED 상태의 타이머들의 study_time 합산을 반환합니다."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공",
@@ -98,8 +98,8 @@ public class TimerController {
             @ApiResponse(responseCode = "401", description = "인증 실패")
     })
     @GetMapping("/stats")
-    public ResponseEntity<TimerStatsResponseDto> getTodayStats() {
-        TimerStatsResponseDto response = timerService.getTodayStats();
+    public ResponseEntity<TimerStatsResponseDto> getStats() {
+        TimerStatsResponseDto response = timerService.getStats();
         return ResponseEntity.ok(response);
     }
 }

@@ -142,11 +142,65 @@ public class TimerService {
     }
 
     /**
+     * 통합 공부 시간 통계 조회
+     * - 로그인한 사용자 기준
+     * - STOPPED 상태의 타이머들 study_time 합산
+     * - 오늘, 이번 주, 이번 달, 전체 공부 시간을 한 번에 반환
+     */
+    @Transactional(readOnly = true)
+    public TimerStatsResponseDto getStats() {
+        User currentUser = getCurrentUser();
+        LocalDate today = LocalDate.now();
+
+        // 오늘 공부 시간
+        Integer todayStudyTime = timerRepository.sumStudyTimeByUserAndStatusAndDate(
+                currentUser,
+                TimerStatus.STOPPED,
+                today
+        );
+
+        // 이번 주 공부 시간 (오늘 포함 최근 7일)
+        LocalDate weekStart = today.minusDays(6); // 오늘 포함 7일
+        LocalDate weekEnd = today;
+        Integer weeklyStudyTime = timerRepository.sumStudyTimeByUserAndStatusAndDateRange(
+                currentUser,
+                TimerStatus.STOPPED,
+                weekStart,
+                weekEnd
+        );
+
+        // 이번 달 공부 시간
+        int year = today.getYear();
+        int month = today.getMonthValue();
+        Integer monthlyStudyTime = timerRepository.sumStudyTimeByUserAndStatusAndYearMonth(
+                currentUser,
+                TimerStatus.STOPPED,
+                year,
+                month
+        );
+
+        // 전체 공부 시간
+        Integer totalStudyTime = timerRepository.sumStudyTimeByUserAndStatus(
+                currentUser,
+                TimerStatus.STOPPED
+        );
+
+        return new TimerStatsResponseDto(
+                todayStudyTime,
+                weeklyStudyTime,
+                monthlyStudyTime,
+                totalStudyTime
+        );
+    }
+
+    /**
      * 오늘 공부 시간 통계 조회
      * - 로그인한 사용자 기준
      * - STOPPED 상태의 타이머들 study_time 합산
      * - 오늘 기준 공부 시간 반환
+     * @deprecated getStats() 사용 권장
      */
+    @Deprecated
     @Transactional(readOnly = true)
     public TimerStatsResponseDto getTodayStats() {
         User currentUser = getCurrentUser();
@@ -158,7 +212,76 @@ public class TimerService {
                 today
         );
 
-        return new TimerStatsResponseDto(totalStudyTime);
+        return new TimerStatsResponseDto(totalStudyTime, 0, 0, 0);
+    }
+
+    /**
+     * 주간 공부 시간 통계 조회
+     * - 로그인한 사용자 기준
+     * - STOPPED 상태의 타이머들 study_time 합산
+     * - 오늘을 포함한 최근 7일 기준 공부 시간 반환
+     * @deprecated getStats() 사용 권장
+     */
+    @Deprecated
+    @Transactional(readOnly = true)
+    public TimerStatsResponseDto getWeeklyStats() {
+        User currentUser = getCurrentUser();
+        LocalDate today = LocalDate.now();
+        LocalDate startDate = today.minusDays(6); // 오늘 포함 7일
+
+        Integer totalStudyTime = timerRepository.sumStudyTimeByUserAndStatusAndDateRange(
+                currentUser,
+                TimerStatus.STOPPED,
+                startDate,
+                today
+        );
+
+        return new TimerStatsResponseDto(0, totalStudyTime, 0, 0);
+    }
+
+    /**
+     * 월간 공부 시간 통계 조회
+     * - 로그인한 사용자 기준
+     * - STOPPED 상태의 타이머들 study_time 합산
+     * - 현재 달 기준 공부 시간 반환
+     * @deprecated getStats() 사용 권장
+     */
+    @Deprecated
+    @Transactional(readOnly = true)
+    public TimerStatsResponseDto getMonthlyStats() {
+        User currentUser = getCurrentUser();
+        LocalDate now = LocalDate.now();
+        int year = now.getYear();
+        int month = now.getMonthValue();
+
+        Integer totalStudyTime = timerRepository.sumStudyTimeByUserAndStatusAndYearMonth(
+                currentUser,
+                TimerStatus.STOPPED,
+                year,
+                month
+        );
+
+        return new TimerStatsResponseDto(0, 0, totalStudyTime, 0);
+    }
+
+    /**
+     * 전체 공부 시간 통계 조회
+     * - 로그인한 사용자 기준
+     * - STOPPED 상태의 타이머들 study_time 합산
+     * - 전체 기간 공부 시간 반환
+     * @deprecated getStats() 사용 권장
+     */
+    @Deprecated
+    @Transactional(readOnly = true)
+    public TimerStatsResponseDto getTotalStats() {
+        User currentUser = getCurrentUser();
+
+        Integer totalStudyTime = timerRepository.sumStudyTimeByUserAndStatus(
+                currentUser,
+                TimerStatus.STOPPED
+        );
+
+        return new TimerStatsResponseDto(0, 0, 0, totalStudyTime);
     }
 
     private User getCurrentUser() {

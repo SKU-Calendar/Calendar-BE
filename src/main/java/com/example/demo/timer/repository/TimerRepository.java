@@ -38,5 +38,41 @@ public interface TimerRepository extends JpaRepository<Timer, UUID> {
             @Param("status") TimerStatus status,
             @Param("date") LocalDate date
     );
+
+    /**
+     * 특정 사용자의 기간 내 STOPPED 상태 타이머들의 study_time 합산 (주간 조회용)
+     */
+    @Query("SELECT COALESCE(SUM(t.studyTime), 0) FROM Timer t " +
+           "WHERE t.user = :user AND t.status = :status " +
+           "AND DATE(t.stoppedAt) >= :startDate AND DATE(t.stoppedAt) <= :endDate")
+    Integer sumStudyTimeByUserAndStatusAndDateRange(
+            @Param("user") User user,
+            @Param("status") TimerStatus status,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
+    /**
+     * 특정 사용자의 월 기준 STOPPED 상태 타이머들의 study_time 합산 (월간 조회용)
+     */
+    @Query("SELECT COALESCE(SUM(t.studyTime), 0) FROM Timer t " +
+           "WHERE t.user = :user AND t.status = :status " +
+           "AND YEAR(t.stoppedAt) = :year AND MONTH(t.stoppedAt) = :month")
+    Integer sumStudyTimeByUserAndStatusAndYearMonth(
+            @Param("user") User user,
+            @Param("status") TimerStatus status,
+            @Param("year") int year,
+            @Param("month") int month
+    );
+
+    /**
+     * 특정 사용자의 전체 STOPPED 상태 타이머들의 study_time 합산 (전체 조회용)
+     */
+    @Query("SELECT COALESCE(SUM(t.studyTime), 0) FROM Timer t " +
+           "WHERE t.user = :user AND t.status = :status")
+    Integer sumStudyTimeByUserAndStatus(
+            @Param("user") User user,
+            @Param("status") TimerStatus status
+    );
 }
 
