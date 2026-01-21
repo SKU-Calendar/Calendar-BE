@@ -1,5 +1,5 @@
-// src/main/java/com/example/demo/users/dto/UpdateMyProfileRequest.java
-package com.example.demo.users.dto;
+// src/main/java/com/example/demo/user/dto/UpdateMyProfileRequest.java
+package com.example.demo.user.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

@@ -1,9 +1,9 @@
-// src/main/java/com/example/demo/users/controller/UserController.java
-package com.example.demo.users.controller;
+// src/main/java/com/example/demo/user/controller/UserController.java
+package com.example.demo.user.controller;
 
-import com.example.demo.users.dto.UpdateMyProfileRequest;
-import com.example.demo.users.dto.UserProfileResponse;
-import com.example.demo.users.service.UserService;
+import com.example.demo.user.dto.UpdateMyProfileRequest;
+import com.example.demo.user.dto.UserProfileResponse;
+import com.example.demo.user.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/user")
 public class UserController {
 
     private final UserService userService;
