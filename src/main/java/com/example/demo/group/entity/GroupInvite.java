@@ -1,50 +1,40 @@
 package com.example.demo.group.entity;
 
 import jakarta.persistence.*;
-import java.time.Instant;
+import lombok.*;
+
+import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Getter
 @Entity
-@Table(
-        name = "group_invite",
-        uniqueConstraints = @UniqueConstraint(name = "uk_group_invite_code", columnNames = {"invite_code"})
-)
+@Table(name = "group_invite",
+       indexes = @Index(name = "idx_group_invite_code", columnList = "invite_code", unique = true))
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 public class GroupInvite {
 
     @Id
-    @Column(name = "id", nullable = false)
+    @Column(columnDefinition = "uuid")
     private UUID id;
 
-    @Column(name = "group_id", nullable = false)
+    @Column(name = "group_id", nullable = false, columnDefinition = "uuid")
     private UUID groupId;
 
     @Column(name = "invite_code", nullable = false, length = 20)
     private String inviteCode;
 
-    @Column(name = "created_by", nullable = false)
+    @Column(name = "created_by", nullable = false, columnDefinition = "uuid")
     private UUID createdBy;
 
     @Column(name = "created_at", nullable = false)
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "expires_at")
-    private Instant expiresAt;
+    private LocalDateTime expiresAt;
 
-    protected GroupInvite() {}
-
-    public GroupInvite(UUID id, UUID groupId, String inviteCode, UUID createdBy, Instant createdAt, Instant expiresAt) {
-        this.id = id;
-        this.groupId = groupId;
-        this.inviteCode = inviteCode;
-        this.createdBy = createdBy;
-        this.createdAt = createdAt;
-        this.expiresAt = expiresAt;
+    public boolean isExpired() {
+        return expiresAt != null && expiresAt.isBefore(LocalDateTime.now());
     }
-
-    public UUID getId() { return id; }
-    public UUID getGroupId() { return groupId; }
-    public String getInviteCode() { return inviteCode; }
-    public UUID getCreatedBy() { return createdBy; }
-    public Instant getCreatedAt() { return createdAt; }
-    public Instant getExpiresAt() { return expiresAt; }
 }
