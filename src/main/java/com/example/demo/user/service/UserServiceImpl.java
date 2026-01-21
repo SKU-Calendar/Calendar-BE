@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
 import java.util.UUID;
 
 @Service
@@ -43,11 +42,8 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
 
         if (req.name() != null && !req.name().isBlank()) {
-            u.setName(req.name().trim());
+            u.changeName(req.name().trim());
         }
-
-        // updatedAt 자동처리가 없다면 여기서 수동 업데이트
-        u.setUpdatedAt(Instant.now());
 
         return new UserMeUpdateResponse(u.getId(), u.getName(), u.getUpdatedAt());
     }

@@ -53,7 +53,7 @@ public class UserController {
             @AuthenticationPrincipal String principal,
             @PathVariable("user_id") UUID userId
     ) {
-        // 로그인만 체크(권한 정책은 필요하면 여기서 확장)
+        // 로그인 체크
         authHelper.requireUserId(principal);
         return ResponseEntity.ok(userService.getUserProfile(userId));
     }
