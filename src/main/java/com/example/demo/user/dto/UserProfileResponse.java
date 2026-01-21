@@ -1,5 +1,5 @@
-// src/main/java/com/example/demo/users/dto/UserProfileResponse.java
-package com.example.demo.users.dto;
+// src/main/java/com/example/demo/user/dto/UserProfileResponse.java
+package com.example.demo.user.dto;
 
 import java.time.Instant;
 import java.util.UUID;

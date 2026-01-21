@@ -1,8 +1,8 @@
-// src/main/java/com/example/demo/users/service/UserService.java
-package com.example.demo.users.service;
+// src/main/java/com/example/demo/user/service/UserService.java
+package com.example.demo.user.service;
 
-import com.example.demo.users.dto.UpdateMyProfileRequest;
-import com.example.demo.users.dto.UserProfileResponse;
+import com.example.demo.user.dto.UpdateMyProfileRequest;
+import com.example.demo.user.dto.UserProfileResponse;
 
 import java.util.UUID;
 

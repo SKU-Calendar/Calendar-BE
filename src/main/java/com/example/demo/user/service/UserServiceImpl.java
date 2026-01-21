@@ -1,10 +1,10 @@
-// src/main/java/com/example/demo/users/service/UserServiceImpl.java
-package com.example.demo.users.service;
+// src/main/java/com/example/demo/user/service/UserServiceImpl.java
+package com.example.demo.user.service;
 
-import com.example.demo.users.dto.UpdateMyProfileRequest;
-import com.example.demo.users.dto.UserProfileResponse;
-import com.example.demo.users.entity.User;
-import com.example.demo.users.repository.UserRepository;
+import com.example.demo.user.dto.UpdateMyProfileRequest;
+import com.example.demo.user.dto.UserProfileResponse;
+import com.example.demo.user.entity.User;
+import com.example.demo.user.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
