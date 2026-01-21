@@ -21,8 +21,6 @@ public class GroupService {
     private final GroupRepository groupRepository;
     private final GroupMemberRepository memberRepository;
     private final GroupInviteRepository inviteRepository;
-
-    // ✅ email -> userId 변환을 위해 추가
     private final UserRepository userRepository;
 
     private static final String CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -51,11 +49,6 @@ public class GroupService {
     @Transactional
     public GroupResponse createGroupByEmail(String email, GroupCreateRequest req) {
         return createGroup(resolveUserIdByEmail(email), req);
-    }
-
-    @Transactional(readOnly = true)
-    public List<GroupResponse> listMyGroupsByEmail(String email) {
-        return listMyGroups(resolveUserIdByEmail(email));
     }
 
     @Transactional(readOnly = true)
@@ -99,19 +92,9 @@ public class GroupService {
     }
 
     // =========================================================
-    // ✅ 추가: 공개/전체 그룹 리스트
+    // ✅ 이제 /api/group GET에서 사용할 "전체 그룹 조회"
     // =========================================================
 
-    // ✅ 공개 그룹 전체(탐색용)
-    @Transactional(readOnly = true)
-    public List<GroupResponse> listPublicGroups() {
-        return groupRepository.findByIsPublicTrue()
-                .stream()
-                .map(this::toResponse)
-                .toList();
-    }
-
-    // ✅ (선택) 진짜 전체 그룹(all) - 개발/관리자용
     @Transactional(readOnly = true)
     public List<GroupResponse> listAllGroups() {
         return groupRepository.findAll()
@@ -121,7 +104,7 @@ public class GroupService {
     }
 
     // =========================================================
-    // 기존 로직 (UUID userId 기반) - 그대로 유지
+    // 기존 로직 (UUID userId 기반)
     // =========================================================
 
     // -----------------------------
@@ -141,16 +124,6 @@ public class GroupService {
         memberRepository.save(owner);
 
         return toResponse(group);
-    }
-
-    @Transactional(readOnly = true)
-    public List<GroupResponse> listMyGroups(UUID userId) {
-        // ✅ “내가 속한 그룹” 기준
-        List<GroupMember> myMemberships = memberRepository.findByUserId(userId);
-        if (myMemberships.isEmpty()) return List.of();
-
-        List<UUID> groupIds = myMemberships.stream().map(GroupMember::getGroupId).distinct().toList();
-        return groupRepository.findByIdIn(groupIds).stream().map(this::toResponse).toList();
     }
 
     @Transactional(readOnly = true)
@@ -177,7 +150,6 @@ public class GroupService {
     public void deleteGroup(UUID requesterId, UUID groupId) {
         requireOwner(requesterId, groupId);
 
-        // 멤버십/초대코드 정리 (초대코드는 데이터 보존 정책에 따라 삭제/유지 선택)
         memberRepository.deleteByGroupId(groupId);
         groupRepository.deleteById(groupId);
     }
@@ -218,11 +190,9 @@ public class GroupService {
 
         UUID groupId = invite.getGroupId();
 
-        // 그룹 존재 체크(삭제된 그룹의 초대코드 방지)
         groupRepository.findById(groupId)
                 .orElseThrow(() -> new IllegalArgumentException("그룹을 찾을 수 없습니다."));
 
-        // 이미 멤버면 아무 작업 안 함(원하면 예외로 바꿔도 됨)
         if (memberRepository.existsByGroupIdAndUserId(groupId, requesterId)) {
             return;
         }
@@ -253,14 +223,12 @@ public class GroupService {
     public void kickMember(UUID requesterId, UUID groupId, UUID targetUserId) {
         requireOwner(requesterId, groupId);
 
-        // owner는 강퇴 불가
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new IllegalArgumentException("그룹을 찾을 수 없습니다."));
         if (group.getOwnerUserId().equals(targetUserId)) {
             throw new IllegalStateException("그룹 소유자는 제거할 수 없습니다.");
         }
 
-        // 멤버인지 확인 후 삭제
         if (!memberRepository.existsByGroupIdAndUserId(groupId, targetUserId)) {
             throw new IllegalArgumentException("해당 사용자는 그룹 멤버가 아닙니다.");
         }
