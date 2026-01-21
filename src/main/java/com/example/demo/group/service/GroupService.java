@@ -4,7 +4,7 @@ import com.example.demo.group.dto.*;
 import com.example.demo.group.entity.*;
 import com.example.demo.group.repository.*;
 import com.example.demo.user.entity.User;
-import com.example.demo.user.repository.UserRepository; 
+import com.example.demo.user.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +43,6 @@ public class GroupService {
     // =========================================================
 
     private UUID resolveUserIdByEmail(String email) {
-        // findByEmail 없으면 UserRepository에 추가해야 함
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "유저를 찾을 수 없습니다."));
         return user.getId();
@@ -97,6 +96,28 @@ public class GroupService {
     @Transactional
     public void leaveGroupByEmail(String email, UUID groupId) {
         leaveGroup(resolveUserIdByEmail(email), groupId);
+    }
+
+    // =========================================================
+    // ✅ 추가: 공개/전체 그룹 리스트
+    // =========================================================
+
+    // ✅ 공개 그룹 전체(탐색용)
+    @Transactional(readOnly = true)
+    public List<GroupResponse> listPublicGroups() {
+        return groupRepository.findByIsPublicTrue()
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    // ✅ (선택) 진짜 전체 그룹(all) - 개발/관리자용
+    @Transactional(readOnly = true)
+    public List<GroupResponse> listAllGroups() {
+        return groupRepository.findAll()
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     // =========================================================
