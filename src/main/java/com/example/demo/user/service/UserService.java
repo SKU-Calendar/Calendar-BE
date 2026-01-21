@@ -1,4 +1,3 @@
-// src/main/java/com/example/demo/user/service/UserService.java
 package com.example.demo.user.service;
 
 import com.example.demo.user.dto.UpdateMyProfileRequest;

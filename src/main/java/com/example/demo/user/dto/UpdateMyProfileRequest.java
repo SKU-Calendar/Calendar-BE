@@ -1,4 +1,3 @@
-// src/main/java/com/example/demo/user/dto/UpdateMyProfileRequest.java
 package com.example.demo.user.dto;
 
 import jakarta.validation.constraints.NotBlank;
@@ -8,4 +7,4 @@ public record UpdateMyProfileRequest(
         @NotBlank(message = "name은 필수입니다.")
         @Size(max = 100, message = "name은 최대 100자입니다.")
         String name
-) { }
+) {}
