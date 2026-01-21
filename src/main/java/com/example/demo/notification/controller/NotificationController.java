@@ -1,6 +1,6 @@
 package com.example.demo.notification.controller;
 
-import com.example.demo.common.security.CustomPrincipal;
+import com.example.demo.common.security.AuthHelper;
 import com.example.demo.notification.dto.NotificationReadResponse;
 import com.example.demo.notification.dto.NotificationResponse;
 import com.example.demo.notification.service.NotificationService;
@@ -8,11 +8,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -23,16 +21,11 @@ import java.util.UUID;
 public class NotificationController {
 
     private final NotificationService notificationService;
+    private final AuthHelper authHelper;
 
-    public NotificationController(NotificationService notificationService) {
+    public NotificationController(NotificationService notificationService, AuthHelper authHelper) {
         this.notificationService = notificationService;
-    }
-
-    private UUID requireUserId(CustomPrincipal principal) {
-        if (principal == null || principal.userId() == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
-        }
-        return principal.userId();
+        this.authHelper = authHelper;
     }
 
     @Operation(summary = "알림 목록 조회", description = "내 알림 목록을 최신순으로 조회합니다.")
@@ -42,9 +35,9 @@ public class NotificationController {
     })
     @GetMapping
     public ResponseEntity<List<NotificationResponse>> list(
-            @AuthenticationPrincipal CustomPrincipal principal
+            @AuthenticationPrincipal String principal
     ) {
-        UUID userId = requireUserId(principal);
+        UUID userId = authHelper.requireUserId(principal);
         return ResponseEntity.ok(notificationService.listMyNotifications(userId));
     }
 
@@ -56,10 +49,10 @@ public class NotificationController {
     })
     @PatchMapping("/{notificationId}/read")
     public ResponseEntity<NotificationReadResponse> markRead(
-            @AuthenticationPrincipal CustomPrincipal principal,
+            @AuthenticationPrincipal String principal,
             @PathVariable UUID notificationId
     ) {
-        UUID userId = requireUserId(principal);
+        UUID userId = authHelper.requireUserId(principal);
         return ResponseEntity.ok(notificationService.markAsRead(userId, notificationId));
     }
 }
