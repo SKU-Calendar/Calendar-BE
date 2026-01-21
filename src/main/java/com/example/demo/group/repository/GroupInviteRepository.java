@@ -8,5 +8,4 @@ import java.util.UUID;
 
 public interface GroupInviteRepository extends JpaRepository<GroupInvite, UUID> {
     Optional<GroupInvite> findByInviteCode(String inviteCode);
-    boolean existsByInviteCode(String inviteCode);
 }

@@ -9,7 +9,7 @@ import java.util.UUID;
 public class Group {
 
     @Id
-    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "owner_user_id", nullable = false)
@@ -19,29 +19,25 @@ public class Group {
     private String groupName;
 
     @Column(name = "is_public", nullable = false)
-    private boolean isPublic;
+    private boolean isPublic = false;
 
     @Column(name = "created_at", nullable = false)
-    private Instant createdAt;
+    private Instant createdAt = Instant.now();
 
     @Column(name = "updated_at", nullable = false)
-    private Instant updatedAt;
+    private Instant updatedAt = Instant.now();
 
     protected Group() {}
 
-    public Group(UUID id, UUID ownerUserId, String groupName, boolean isPublic, Instant now) {
-        this.id = id;
+    public Group(UUID ownerUserId, String groupName, boolean isPublic) {
         this.ownerUserId = ownerUserId;
         this.groupName = groupName;
         this.isPublic = isPublic;
-        this.createdAt = now;
-        this.updatedAt = now;
     }
 
-    public void update(String groupName, Boolean isPublic, Instant now) {
-        if (groupName != null) this.groupName = groupName;
-        if (isPublic != null) this.isPublic = isPublic;
-        this.updatedAt = now;
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = Instant.now();
     }
 
     public UUID getId() { return id; }
@@ -50,4 +46,9 @@ public class Group {
     public boolean isPublic() { return isPublic; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
+
+    public void update(String groupName, Boolean isPublic) {
+        if (groupName != null && !groupName.isBlank()) this.groupName = groupName;
+        if (isPublic != null) this.isPublic = isPublic;
+    }
 }
