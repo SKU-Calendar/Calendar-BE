@@ -5,7 +5,8 @@ import java.util.UUID;
 
 public record NotificationResponse(
         UUID id,
+        UUID userId,
         boolean isRead,
         LocalDateTime readAt,
         LocalDateTime createdAt
-) {}
+) { }

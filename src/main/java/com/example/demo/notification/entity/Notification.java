@@ -1,19 +1,24 @@
 package com.example.demo.notification.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Getter
 @Entity
 @Table(name = "notification")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 public class Notification {
 
     @Id
-    @Column(name = "id", nullable = false)
+    @Column(columnDefinition = "uuid")
     private UUID id;
 
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "user_id", nullable = false, columnDefinition = "uuid")
     private UUID userId;
 
     @Column(name = "is_read", nullable = false)
@@ -25,31 +30,10 @@ public class Notification {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    protected Notification() {}
-
-    private Notification(UUID id, UUID userId, boolean isRead, LocalDateTime readAt, LocalDateTime createdAt) {
-        this.id = id;
-        this.userId = userId;
-        this.isRead = isRead;
-        this.readAt = readAt;
-        this.createdAt = createdAt;
-    }
-
-    /** ✅ 새 알림 생성 (ERD 변경 없이 최소 알림) */
-    public static Notification create(UUID userId, LocalDateTime now) {
-        return new Notification(UUID.randomUUID(), userId, false, null, now);
-    }
-
-    public UUID getId() { return id; }
-    public UUID getUserId() { return userId; }
-    public boolean isRead() { return isRead; }
-    public LocalDateTime getReadAt() { return readAt; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-
-    public void markRead(LocalDateTime now) {
+    public void markRead() {
         if (!this.isRead) {
             this.isRead = true;
-            this.readAt = now;
+            this.readAt = LocalDateTime.now();
         }
     }
 }

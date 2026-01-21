@@ -50,6 +50,9 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
+                                // ✅ WebSocket handshake endpoint 허용 (STOMP)
+                                "/api/notifications"
+                                
                         ).permitAll()
 
                         // 나머지는 인증 필요
