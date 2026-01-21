@@ -7,15 +7,12 @@ import java.util.UUID;
 @Entity
 @Table(
         name = "group_member",
-        uniqueConstraints = @UniqueConstraint(
-                name = "uk_group_member_group_user",
-                columnNames = {"group_id", "user_id"}
-        )
+        uniqueConstraints = @UniqueConstraint(name = "uk_group_member_group_user", columnNames = {"group_id", "user_id"})
 )
 public class GroupMember {
 
     @Id
-    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "group_id", nullable = false)
@@ -25,25 +22,32 @@ public class GroupMember {
     private UUID userId;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
+    private GroupMemberStatus status = GroupMemberStatus.ACTIVE;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 20)
-    private GroupMemberRole role;
+    private GroupRole role = GroupRole.MEMBER;
 
     @Column(name = "joined_at", nullable = false)
-    private Instant joinedAt;
+    private Instant joinedAt = Instant.now();
 
     protected GroupMember() {}
 
-    public GroupMember(UUID id, UUID groupId, UUID userId, GroupMemberRole role, Instant joinedAt) {
-        this.id = id;
+    public GroupMember(UUID groupId, UUID userId, GroupRole role) {
         this.groupId = groupId;
         this.userId = userId;
         this.role = role;
-        this.joinedAt = joinedAt;
+        this.status = GroupMemberStatus.ACTIVE;
+        this.joinedAt = Instant.now();
     }
 
     public UUID getId() { return id; }
     public UUID getGroupId() { return groupId; }
     public UUID getUserId() { return userId; }
-    public GroupMemberRole getRole() { return role; }
+    public GroupMemberStatus getStatus() { return status; }
+    public GroupRole getRole() { return role; }
     public Instant getJoinedAt() { return joinedAt; }
+
+    public boolean isOwner() { return role == GroupRole.OWNER; }
 }

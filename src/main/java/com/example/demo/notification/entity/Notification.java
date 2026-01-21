@@ -1,8 +1,7 @@
 package com.example.demo.notification.entity;
 
 import jakarta.persistence.*;
-
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -10,46 +9,61 @@ import java.util.UUID;
 public class Notification {
 
     @Id
-    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false, length = 50)
+    private NotificationType type;
+
+    @Column(name = "title", nullable = false, length = 120)
+    private String title;
+
+    @Column(name = "body", nullable = false, length = 500)
+    private String body;
+
+    // 관련 엔티티 식별용(예: groupId)
+    @Column(name = "ref_id")
+    private UUID refId;
+
     @Column(name = "is_read", nullable = false)
-    private boolean isRead;
+    private boolean isRead = false;
 
     @Column(name = "read_at")
-    private LocalDateTime readAt;
+    private Instant readAt;
 
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt = Instant.now();
 
     protected Notification() {}
 
-    private Notification(UUID id, UUID userId, boolean isRead, LocalDateTime readAt, LocalDateTime createdAt) {
-        this.id = id;
+    public Notification(UUID userId, NotificationType type, String title, String body, UUID refId) {
         this.userId = userId;
-        this.isRead = isRead;
-        this.readAt = readAt;
-        this.createdAt = createdAt;
-    }
-
-    /** ✅ 새 알림 생성 (ERD 변경 없이 최소 알림) */
-    public static Notification create(UUID userId, LocalDateTime now) {
-        return new Notification(UUID.randomUUID(), userId, false, null, now);
+        this.type = type;
+        this.title = title;
+        this.body = body;
+        this.refId = refId;
+        this.isRead = false;
+        this.createdAt = Instant.now();
     }
 
     public UUID getId() { return id; }
     public UUID getUserId() { return userId; }
+    public NotificationType getType() { return type; }
+    public String getTitle() { return title; }
+    public String getBody() { return body; }
+    public UUID getRefId() { return refId; }
     public boolean isRead() { return isRead; }
-    public LocalDateTime getReadAt() { return readAt; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
+    public Instant getReadAt() { return readAt; }
+    public Instant getCreatedAt() { return createdAt; }
 
-    public void markRead(LocalDateTime now) {
+    public void markRead() {
         if (!this.isRead) {
             this.isRead = true;
-            this.readAt = now;
+            this.readAt = Instant.now();
         }
     }
 }

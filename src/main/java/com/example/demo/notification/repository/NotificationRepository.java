@@ -1,22 +1,15 @@
 package com.example.demo.notification.repository;
 
 import com.example.demo.notification.entity.Notification;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.*;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public interface NotificationRepository extends JpaRepository<Notification, UUID> {
 
-    @Query("""
-        select n
-        from Notification n
-        where n.userId = :userId
-        order by n.isRead asc, n.createdAt desc
-    """)
-    List<Notification> findMyNotifications(UUID userId, Pageable pageable);
+    List<Notification> findByUserIdOrderByCreatedAtDesc(UUID userId);
 
     Optional<Notification> findByIdAndUserId(UUID id, UUID userId);
-
-    long countByUserIdAndIsReadFalse(UUID userId);
 }

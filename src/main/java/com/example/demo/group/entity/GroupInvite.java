@@ -12,7 +12,7 @@ import java.util.UUID;
 public class GroupInvite {
 
     @Id
-    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "group_id", nullable = false)
@@ -25,20 +25,19 @@ public class GroupInvite {
     private UUID createdBy;
 
     @Column(name = "created_at", nullable = false)
-    private Instant createdAt;
+    private Instant createdAt = Instant.now();
 
     @Column(name = "expires_at")
     private Instant expiresAt;
 
     protected GroupInvite() {}
 
-    public GroupInvite(UUID id, UUID groupId, String inviteCode, UUID createdBy, Instant createdAt, Instant expiresAt) {
-        this.id = id;
+    public GroupInvite(UUID groupId, String inviteCode, UUID createdBy, Instant expiresAt) {
         this.groupId = groupId;
         this.inviteCode = inviteCode;
         this.createdBy = createdBy;
-        this.createdAt = createdAt;
         this.expiresAt = expiresAt;
+        this.createdAt = Instant.now();
     }
 
     public UUID getId() { return id; }
@@ -47,4 +46,8 @@ public class GroupInvite {
     public UUID getCreatedBy() { return createdBy; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getExpiresAt() { return expiresAt; }
+
+    public boolean isExpired() {
+        return expiresAt != null && expiresAt.isBefore(Instant.now());
+    }
 }

@@ -3,7 +3,7 @@ package com.example.demo.group.dto;
 import java.time.Instant;
 import java.util.UUID;
 
-public record GroupResponse(
+public record GroupDetailResponse(
         UUID id,
         String groupName,
         boolean isPublic,
