@@ -2,10 +2,13 @@ package com.example.demo.user.repository;
 
 import com.example.demo.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
 import java.util.UUID;
 
 public interface UserRepository extends JpaRepository<User, UUID> {
-    Optional<User> findByEmail(String email); // principal이 email일 때 사용
+
+    @Query("select u.id from User u where u.email = :email")
+    Optional<UUID> findIdByEmail(String email);
 }
