@@ -25,18 +25,22 @@ repositories {
 }
 
 dependencies {
-     // ✅ github action 
+    // ✅ github action
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
     // ✅ MVC 기본(Controller/DispatcherServlet)
     implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // ✅ WebSocket (🔥 추가)
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
     // ✅ Security / JPA / Validation
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.flywaydb:flyway-core'
-
     implementation 'org.flywaydb:flyway-database-postgresql'
+
     // ✅ WebClient 사용 시 필요(reactor-netty 기반)
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
@@ -45,17 +49,23 @@ dependencies {
 
     // ✅ OpenAPI / Swagger UI (충돌 최소화 목적)
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
+
     // ✅ JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
 
-    def lombokVersion = "1.18.34"
+    // ✅ Lombok (🔥 1.18.36 권장으로 업데이트)
+    def lombokVersion = "1.18.36"
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
+    // ✅ Jackson (네가 BOM 쓰는 방식 유지)
     implementation platform("com.fasterxml.jackson:jackson-bom:2.17.2")
     implementation "com.fasterxml.jackson.core:jackson-databind"
     implementation "com.fasterxml.jackson.core:jackson-core"
@@ -67,6 +77,7 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
 configurations.configureEach {
     exclude group: "tools.jackson.core"
     exclude group: "tools.jackson.databind"
