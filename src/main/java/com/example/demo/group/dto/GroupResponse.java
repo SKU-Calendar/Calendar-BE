@@ -1,6 +1,6 @@
 package com.example.demo.group.dto;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record GroupResponse(
@@ -8,6 +8,8 @@ public record GroupResponse(
         UUID ownerUserId,
         String groupName,
         boolean isPublic,
-        Instant createdAt,
-        Instant updatedAt
-) {}
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt,
+        long memberCount,
+        String myRole // null 가능(전체 조회 시)
+) { }
