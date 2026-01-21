@@ -1,4 +1,3 @@
-// src/main/java/com/example/demo/user/controller/UserController.java
 package com.example.demo.user.controller;
 
 import com.example.demo.user.dto.UpdateMyProfileRequest;
@@ -12,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
 public class UserController {
 
     private final UserService userService;
@@ -21,7 +20,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    // ✅ 프로필 조회
+    // ✅ 내 프로필
     @GetMapping("/me")
     public ResponseEntity<UserProfileResponse> me(
             @AuthenticationPrincipal String principal
@@ -29,15 +28,15 @@ public class UserController {
         return ResponseEntity.ok(userService.getMe(principal));
     }
 
-    // ✅ 상대 프로필 조회
+    // ✅ 유저 프로필 조회(공개)
     @GetMapping("/{userId}")
-    public ResponseEntity<UserProfileResponse> getOther(
+    public ResponseEntity<UserProfileResponse> getById(
             @PathVariable UUID userId
     ) {
         return ResponseEntity.ok(userService.getById(userId));
     }
 
-    // ✅ 프로필 수정
+    // ✅ 내 프로필 수정(이름)
     @PatchMapping("/me")
     public ResponseEntity<UserProfileResponse> updateMe(
             @AuthenticationPrincipal String principal,

@@ -1,4 +1,3 @@
-// src/main/java/com/example/demo/user/service/UserServiceImpl.java
 package com.example.demo.user.service;
 
 import com.example.demo.user.dto.UpdateMyProfileRequest;
@@ -10,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -28,13 +27,13 @@ public class UserServiceImpl implements UserService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
         }
 
-        // 1) UUID로 파싱되면 id로 조회
+        // principal이 UUID 문자열이면 id로 조회
         try {
             UUID userId = UUID.fromString(principalString);
             return userRepository.findById(userId)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "유효하지 않은 사용자입니다."));
         } catch (IllegalArgumentException ignore) {
-            // 2) UUID가 아니면 email로 조회
+            // 아니면 email로 조회
             return userRepository.findByEmail(principalString)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "유효하지 않은 사용자입니다."));
         }
@@ -45,7 +44,8 @@ public class UserServiceImpl implements UserService {
                 u.getId(),
                 u.getEmail(),
                 u.getName(),
-                u.getCreatedAt()
+                u.getCreatedAt(),
+                u.getUpdatedAt()
         );
     }
 
@@ -68,9 +68,9 @@ public class UserServiceImpl implements UserService {
         User me = resolveCurrentUser(principalString);
 
         me.setName(req.name());
-        me.setUpdatedAt(Instant.now());
+        me.setUpdatedAt(LocalDateTime.now());
 
-        // dirty checking
+        // dirty checking으로 자동 반영
         return toProfile(me);
     }
 }
