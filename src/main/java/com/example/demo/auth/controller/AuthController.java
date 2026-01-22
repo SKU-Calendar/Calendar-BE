@@ -2,6 +2,8 @@ package com.example.demo.auth.controller;
 
 import com.example.demo.auth.dto.AuthResponseDto;
 import com.example.demo.auth.dto.LoginRequestDto;
+import com.example.demo.auth.dto.RefreshTokenRequestDto;
+import com.example.demo.auth.dto.RefreshTokenResponseDto;
 import com.example.demo.auth.dto.SignupRequestDto;
 import com.example.demo.auth.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -68,6 +70,22 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<AuthResponseDto> logout() {
         AuthResponseDto response = authService.logout();
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "토큰 재발급",
+            description = "만료된 Access Token을 대신하여 유효한 Refresh Token으로 새로운 Access Token을 발급합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "토큰 재발급 성공",
+                    content = @Content(schema = @Schema(implementation = RefreshTokenResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "Refresh Token 누락"),
+            @ApiResponse(responseCode = "401", description = "Refresh Token 검증 실패/만료 또는 사용자 없음")
+    })
+    @PostMapping("/refresh")
+    public ResponseEntity<RefreshTokenResponseDto> refresh(@Valid @RequestBody RefreshTokenRequestDto request) {
+        RefreshTokenResponseDto response = authService.refresh(request);
         return ResponseEntity.ok(response);
     }
 }
