@@ -41,4 +41,21 @@ public class JwtTokenProvider {
             return null;
         }
     }
+
+    /**
+     * Refresh Token을 검증하고 Claims를 반환합니다.
+     * 서명 검증, 만료 여부 확인, issuer 확인을 수행합니다.
+     *
+     * @param refreshToken 검증할 Refresh Token
+     * @return 검증된 Claims
+     * @throws JwtException 토큰 검증 실패 시 (서명 오류, 만료, issuer 불일치 등)
+     */
+    public Claims validateRefreshToken(String refreshToken) throws JwtException {
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .requireIssuer(issuer)
+                .build()
+                .parseSignedClaims(refreshToken)
+                .getPayload();
+    }
 }
