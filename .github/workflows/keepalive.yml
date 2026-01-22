@@ -12,7 +12,7 @@ jobs:
       - name: Ping server
         run: |
           set -e
-          URL="https://calendar-be-d0z4.onrender.com/actuator/health"
+          URL="https://calendar-be-v2.onrender.com/actuator/health"
           CODE=$(curl -sS -m 20 -o /dev/null -w "%{http_code}" "$URL")
           echo "Ping $URL -> HTTP $CODE"
           if [ "$CODE" -lt 200 ] || [ "$CODE" -ge 400 ]; then
